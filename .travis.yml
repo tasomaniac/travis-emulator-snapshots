@@ -27,6 +27,8 @@ script:
 after_script: |
   if [ -n "$GITHUB_API_KEY" ]; then
     cd "/home/travis/.android/avd/test.avd"
+    git lfs install
+    git lfs track "*.img"
     git init
     git checkout -b snapshots-$ANDROID_TARGET
     git add snapshots.img
