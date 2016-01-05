@@ -13,8 +13,8 @@ android:
     - sys-img-armeabi-v7a-$ANDROID_TARGET
 
 before_script:
-  - echo no | android create avd --force -n test -t $ANDROID_TARGET --abi armeabi-v7a
-  - emulator -avd test -no-audio -no-window &
+  - echo no | android create avd --force -n test -t $ANDROID_TARGET --abi armeabi-v7a --sdcard 200M --snapshot
+  - emulator -avd test -no-audio -no-window -no-snapshot-load &
   - android-wait-for-emulator
   - adb shell settings put global window_animation_scale 0 &
   - adb shell settings put global transition_animation_scale 0 &
@@ -23,6 +23,20 @@ before_script:
 
 script:
   - ./gradlew clean connectedCheck -i
+
+after_script: |
+  if [ -n "$GITHUB_API_KEY" ]; then
+    cd "~/.android/avd/test.avd/"
+    git init
+    git checkout -b snapshots-$ANDROID_TARGET
+    git add snapshots.img
+    git add snapshots.img.default-boot.ini
+    git -c user.name='travis' -c user.email='travis' commit -m init
+    # Make sure to make the output quiet, or else the API token will leak!
+    # This works because the API key can replace your password.
+    git push -f -q https://tasomaniac:$GITHUB_API_KEY@github.com/tasomaniac/travis-emulator-snapshots snapshots-$ANDROID_TARGET &2>/dev/null
+    cd "$TRAVIS_BUILD_DIR"
+  fi
 
 env:
   global:
