@@ -26,10 +26,11 @@ script:
 
 after_script: |
   if [ -n "$GITHUB_API_KEY" ]; then
-    cd "/home/travis/.android/"
+    cd "/home/travis/.android/avd/test.avd"
     git init
     git checkout -b snapshots-$ANDROID_TARGET
-    git add .
+    git add snapshots.img
+    git add snapshots.img.default-boot.ini
     git -c user.name='travis' -c user.email='travis' commit -m init
     # Make sure to make the output quiet, or else the API token will leak!
     # This works because the API key can replace your password.
